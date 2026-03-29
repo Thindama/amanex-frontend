@@ -36,7 +36,7 @@ export default function Sidebar({ page, setPage, botOn, setBotOn, isOpen, onClos
       <div className={`overlay ${isOpen ? 'open' : ''}`} onClick={onClose} />
       <div className={`sidebar ${isOpen ? 'open' : ''}`}>
         <div className="logo">
-          <div className="logo-top">AMANEX</div>
+          <a href="https://amanex.de" style={{ textDecoration:'none', color:'inherit' }}><div className="logo-top">AMANEX</div></a>
           <div className="logo-name">Private Trading Intelligence</div>
         </div>
 
