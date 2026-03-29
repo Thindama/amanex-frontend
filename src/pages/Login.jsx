@@ -32,7 +32,7 @@ export default function Login({ onLogin }) {
       {/* LEFT */}
       <div style={{ width:'50%', background:'var(--surface)', borderRight:'1px solid var(--border)', display:'flex', flexDirection:'column', justifyContent:'space-between', padding:'48px 56px' }}>
         <div>
-          <div style={{ fontFamily:'JetBrains Mono, monospace', fontSize:'20px', letterSpacing:'6px', color:'var(--blue)', fontWeight:600 }}>AMANEX</div>
+          <a href="https://amanex.de" style={{ fontFamily:'JetBrains Mono, monospace', fontSize:'20px', letterSpacing:'6px', color:'var(--blue)', fontWeight:600, textDecoration:'none' }}>AMANEX</a>
           <div style={{ fontSize:'11px', color:'var(--muted)', letterSpacing:'2px', marginTop:'4px', textTransform:'uppercase' }}>Private Trading Intelligence</div>
         </div>
         <div>
