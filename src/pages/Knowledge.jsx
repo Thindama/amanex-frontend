@@ -1,28 +1,108 @@
-const LESSONS = [
-  { type:'Schlechte Prognose', c:'b-red', text:'Crypto-Märkte reagieren stärker auf Social-Media-Sentiment. Grok-Gewichtung bei Crypto auf 35% erhöhen.', meta:'28.03.2026 · SOL/USDT · Verlust: -43 EUR' },
-  { type:'Schlechtes Timing', c:'b-yellow', text:'Zentralbank-Entscheidungen sollten frühestens 48h vor dem Termin gehandelt werden. Zu früher Einstieg führt zu erhöhter Volatilität.', meta:'25.03.2026 · Aktien · Verlust: -67 EUR' },
-  { type:'Externer Schock', c:'b-blue', text:'Unerwartete Aussagen können Märkte in Minuten um 20%+ verschieben. Stop-Loss bei 3% setzen.', meta:'20.03.2026 · BTC/USDT · Verlust: -112 EUR' },
-  { type:'Gute Prognose', c:'b-green', text:'Earnings-Plays mit hohem KI-Konsens über 70% lieferten zuverlässig positive Ergebnisse. Muster beibehalten.', meta:'15.03.2026 · NVIDIA · Gewinn: +201 EUR' },
-];
+import { useEffect, useState } from 'react';
+
+const BASE_URL = process.env.REACT_APP_API_URL || 'https://amanex-production.up.railway.app';
+
+async function fetchKnowledge() {
+  const token = localStorage.getItem('amanex_token');
+  const res = await fetch(`${BASE_URL}/api/knowledge`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error('Fehler: ' + res.status);
+  return res.json();
+}
+
+function typeMeta(category) {
+  const c = (category || '').toLowerCase();
+  if (c.includes('schlecht') && c.includes('prognose')) return { label: 'Schlechte Prognose', cls: 'b-red' };
+  if (c.includes('timing')) return { label: 'Schlechtes Timing', cls: 'b-yellow' };
+  if (c.includes('schock') || c.includes('extern')) return { label: 'Externer Schock', cls: 'b-blue' };
+  if (c.includes('gut')) return { label: 'Gute Prognose', cls: 'b-green' };
+  return { label: category || 'Beobachtung', cls: 'b-blue' };
+}
 
 export default function Knowledge() {
+  const [lessons, setLessons] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const data = await fetchKnowledge();
+        if (!cancelled) {
+          setLessons(Array.isArray(data) ? data : []);
+          setErr(null);
+        }
+      } catch (e) {
+        if (!cancelled) setErr(e.message || 'Fehler');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
+  }, []);
+
+  const counts = lessons.reduce((acc, l) => {
+    const meta = typeMeta(l.category);
+    acc[meta.label] = (acc[meta.label] || 0) + 1;
+    return acc;
+  }, {});
+
   return (
     <div className="page-scroll">
+      {err && (
+        <div className="card" style={{ borderColor: 'var(--red)', marginBottom: '12px' }}>
+          <div style={{ color: 'var(--red)', fontSize: '12px' }}>Fehler: {err}</div>
+        </div>
+      )}
       <div className="row-4">
-        <div className="mcard"><div className="mlabel">Lektionen</div><div className="mval">47</div><div className="msub c-muted">90 Tage</div></div>
-        <div className="mcard"><div className="mlabel">Schlechte Prognose</div><div className="mval c-red">18</div><div className="msub c-red">38%</div></div>
-        <div className="mcard"><div className="mlabel">Schlechtes Timing</div><div className="mval c-yellow">14</div><div className="msub c-muted">30%</div></div>
-        <div className="mcard"><div className="mlabel">Externer Schock</div><div className="mval">15</div><div className="msub c-muted">32%</div></div>
+        <div className="mcard">
+          <div className="mlabel">Lektionen</div>
+          <div className="mval">{loading ? '…' : lessons.length}</div>
+          <div className="msub c-muted">Gesamt</div>
+        </div>
+        <div className="mcard">
+          <div className="mlabel">Schlechte Prognose</div>
+          <div className="mval c-red">{counts['Schlechte Prognose'] || 0}</div>
+          <div className="msub c-red">{lessons.length ? Math.round((counts['Schlechte Prognose'] || 0) / lessons.length * 100) + '%' : '—'}</div>
+        </div>
+        <div className="mcard">
+          <div className="mlabel">Schlechtes Timing</div>
+          <div className="mval c-yellow">{counts['Schlechtes Timing'] || 0}</div>
+          <div className="msub c-muted">{lessons.length ? Math.round((counts['Schlechtes Timing'] || 0) / lessons.length * 100) + '%' : '—'}</div>
+        </div>
+        <div className="mcard">
+          <div className="mlabel">Externer Schock</div>
+          <div className="mval">{counts['Externer Schock'] || 0}</div>
+          <div className="msub c-muted">{lessons.length ? Math.round((counts['Externer Schock'] || 0) / lessons.length * 100) + '%' : '—'}</div>
+        </div>
       </div>
       <div className="card">
-        <div className="card-head"><div className="card-title">Bot-Lernprotokoll</div><div className="badge b-blue">47 Einträge</div></div>
-        {LESSONS.map((l,i) => (
-          <div className="learn-item" key={i}>
-            <div className={`badge ${l.c}`} style={{ marginBottom:'10px', display:'inline-block' }}>{l.type}</div>
-            <div style={{ fontSize:'13px', lineHeight:1.7 }}>{l.text}</div>
-            <div style={{ fontFamily:'JetBrains Mono, monospace', fontSize:'10px', color:'var(--muted)', marginTop:'10px' }}>{l.meta}</div>
+        <div className="card-head">
+          <div className="card-title">Bot-Lernprotokoll</div>
+          <div className="badge b-blue">{lessons.length} Einträge</div>
+        </div>
+        {loading && <div style={{ color: 'var(--muted)', fontSize: '12px', padding: '12px' }}>Lade…</div>}
+        {!loading && lessons.length === 0 && (
+          <div style={{ color: 'var(--muted)', fontSize: '12px', padding: '12px' }}>
+            Noch keine Lektionen gespeichert. Der Bot lernt mit jedem Trade dazu.
           </div>
-        ))}
+        )}
+        {lessons.map((l, i) => {
+          const meta = typeMeta(l.category);
+          return (
+            <div className="learn-item" key={l.id || i}>
+              <div className={`badge ${meta.cls}`} style={{ marginBottom: '10px', display: 'inline-block' }}>{meta.label}</div>
+              <div style={{ fontSize: '13px', lineHeight: 1.7 }}>{l.lesson || l.content || l.text || '—'}</div>
+              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '10px', color: 'var(--muted)', marginTop: '10px' }}>
+                {l.created_at ? new Date(l.created_at).toLocaleString('de-DE') : ''}
+                {l.market_id ? ' · ' + l.market_id : ''}
+                {l.pnl != null ? ` · ${l.pnl >= 0 ? '+' : ''}${l.pnl} EUR` : ''}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

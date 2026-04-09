@@ -1,29 +1,98 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Slider from '../components/Slider';
+import { bot as botApi, settings as settingsApi } from '../api/client';
 
-const MODELS = ['Grok (30%)','Claude Sonnet (20%)','GPT-4o (20%)','Gemini Flash (15%)','DeepSeek (15%)'];
+const MODELS = ['Grok (30%)', 'Claude Sonnet (20%)', 'GPT-4o (20%)', 'Gemini Flash (15%)', 'DeepSeek (15%)'];
 
 export default function BotControl({ botOn, setBotOn }) {
   const [kelly, setKelly] = useState('25%');
   const [saved, setSaved] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [status, setStatus] = useState(null);
+  const [err, setErr] = useState(null);
 
-  const handleSave = () => { setSaved(true); setTimeout(() => setSaved(false), 2000); };
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const [s, cfg] = await Promise.all([
+          botApi.getStatus(),
+          settingsApi.get().catch(() => ({})),
+        ]);
+        if (cancelled) return;
+        setStatus(s);
+        setBotOn(!s.killSwitch && !s.stopped);
+        if (cfg.kelly_fraction) {
+          const pct = Math.round(Number(cfg.kelly_fraction) * 100);
+          setKelly(pct + '%');
+        }
+        setErr(null);
+      } catch (e) {
+        if (!cancelled) setErr(e.message || 'Status nicht ladbar');
+      }
+    }
+    load();
+    const id = setInterval(load, 15000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [setBotOn]);
+
+  const toggleBot = async () => {
+    setBusy(true);
+    try {
+      if (botOn) {
+        await botApi.stop();
+        setBotOn(false);
+      } else {
+        await botApi.start();
+        setBotOn(true);
+      }
+    } catch (e) {
+      setErr(e.message || 'Aktion fehlgeschlagen');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      await settingsApi.save({
+        kelly_fraction: parseFloat(kelly) / 100,
+      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (e) {
+      setErr(e.message || 'Speichern fehlgeschlagen');
+    }
+  };
+
+  const uptimeStr = status?.uptime
+    ? Math.floor(status.uptime / 3600) + 'h ' + Math.floor((status.uptime % 3600) / 60) + 'min'
+    : '—';
 
   return (
     <div className="page-scroll">
+      {err && (
+        <div className="card" style={{ borderColor: 'var(--red)', marginBottom: '12px' }}>
+          <div style={{ color: 'var(--red)', fontSize: '12px' }}>{err}</div>
+        </div>
+      )}
       <div className="row-3">
-        <div className="card" style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'16px', padding:'24px 18px' }}>
-          <div style={{ width:'100%', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+        <div className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', padding: '24px 18px' }}>
+          <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div className="card-title">Bot-Status</div>
-            <div className={`badge ${botOn?'b-green':'b-red'}`}>{botOn?'Aktiv':'Gestoppt'}</div>
+            <div className={`badge ${botOn ? 'b-green' : 'b-red'}`}>{botOn ? 'Aktiv' : 'Gestoppt'}</div>
           </div>
-          <div className={`toggle-circle ${botOn?'tc-on':'tc-off'}`} onClick={() => setBotOn(!botOn)}>
+          <div
+            className={`toggle-circle ${botOn ? 'tc-on' : 'tc-off'}`}
+            onClick={busy ? undefined : toggleBot}
+            style={{ opacity: busy ? 0.5 : 1, cursor: busy ? 'wait' : 'pointer' }}
+          >
             {botOn ? 'AN' : 'AUS'}
           </div>
-          <div style={{ textAlign:'center' }}>
-            <div style={{ fontSize:'15px', fontWeight:600 }}>{botOn ? 'Bot läuft' : 'Bot gestoppt'}</div>
-            <div style={{ fontSize:'11px', color:'var(--muted)', fontFamily:'JetBrains Mono, monospace', marginTop:'4px' }}>
-              {botOn ? 'Seit 4h 32min' : 'Manuell gestoppt'}
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '15px', fontWeight: 600 }}>{botOn ? 'Bot läuft' : 'Bot gestoppt'}</div>
+            <div style={{ fontSize: '11px', color: 'var(--muted)', fontFamily: 'JetBrains Mono, monospace', marginTop: '4px' }}>
+              {botOn ? `Seit ${uptimeStr}` : 'Manuell gestoppt'}
             </div>
           </div>
         </div>
@@ -37,13 +106,13 @@ export default function BotControl({ botOn, setBotOn }) {
 
         <div className="card">
           <div className="card-head"><div className="card-title">Kelly-Modus</div></div>
-          <div style={{ textAlign:'center', padding:'10px 0 4px' }}>
-            <div style={{ fontSize:'32px', fontWeight:600, fontFamily:'JetBrains Mono, monospace', color:'var(--blue)' }}>{kelly}</div>
-            <div style={{ fontSize:'11px', color:'var(--muted)', marginTop:'4px' }}>des Kelly-Wertes</div>
+          <div style={{ textAlign: 'center', padding: '10px 0 4px' }}>
+            <div style={{ fontSize: '32px', fontWeight: 600, fontFamily: 'JetBrains Mono, monospace', color: 'var(--blue)' }}>{kelly}</div>
+            <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '4px' }}>des Kelly-Wertes</div>
           </div>
           <div className="kelly-opts">
-            {[['100%','Voll','Max. Wachstum'],['50%','Halb','Ausgewogen'],['25%','Viertel','Empfohlen'],['12%','Achtel','Konservativ']].map(([pct,name,sub]) => (
-              <div key={pct} className={`kelly-opt ${kelly===pct?'on':''}`} onClick={() => setKelly(pct)}>
+            {[['100%', 'Voll', 'Max. Wachstum'], ['50%', 'Halb', 'Ausgewogen'], ['25%', 'Viertel', 'Empfohlen'], ['12%', 'Achtel', 'Konservativ']].map(([pct, name, sub]) => (
+              <div key={pct} className={`kelly-opt ${kelly === pct ? 'on' : ''}`} onClick={() => setKelly(pct)}>
                 <div className="kelly-opt-name">{name} ({pct})</div>
                 <div className="kelly-opt-sub">{sub}</div>
               </div>
@@ -64,24 +133,24 @@ export default function BotControl({ botOn, setBotOn }) {
 
         <div className="card">
           <div className="card-head"><div className="card-title">Aktive Plattformen</div></div>
-          <div className="row-2" style={{ marginBottom:'16px' }}>
-            {[['Binance','USDT Paare'],['Kraken','EUR Paare'],['Hyperliquid','Perps + HIP-3']].map(([p,sub]) => (
-              <div key={p} style={{ padding:'12px', borderRadius:'8px', border:'1px solid var(--blue)', background:'rgba(184,151,90,.07)', cursor:'pointer' }}>
-                <div style={{ fontSize:'13px', fontWeight:500 }}>{p}</div>
-                <div style={{ fontSize:'10px', color:'var(--muted)', marginTop:'3px' }}>{sub}</div>
+          <div className="row-2" style={{ marginBottom: '16px' }}>
+            {[['Binance', 'USDT Paare'], ['Kraken', 'EUR Paare'], ['Hyperliquid', 'Perps + HIP-3']].map(([p, sub]) => (
+              <div key={p} style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--blue)', background: 'rgba(184,151,90,.07)', cursor: 'pointer' }}>
+                <div style={{ fontSize: '13px', fontWeight: 500 }}>{p}</div>
+                <div style={{ fontSize: '10px', color: 'var(--muted)', marginTop: '3px' }}>{sub}</div>
               </div>
             ))}
           </div>
-          <div className="card-head" style={{ marginBottom:'10px' }}><div className="card-title">KI-Modelle</div></div>
-          <div style={{ display:'flex', flexDirection:'column', gap:'6px' }}>
+          <div className="card-head" style={{ marginBottom: '10px' }}><div className="card-title">KI-Modelle</div></div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {MODELS.map(m => (
-              <div key={m} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'8px 12px', background:'var(--surface)', borderRadius:'7px', border:'1px solid var(--border)' }}>
-                <span style={{ fontSize:'12px' }}>{m}</span>
+              <div key={m} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: 'var(--surface)', borderRadius: '7px', border: '1px solid var(--border)' }}>
+                <span style={{ fontSize: '12px' }}>{m}</span>
                 <div className="badge b-green">Aktiv</div>
               </div>
             ))}
           </div>
-          <button className={`save-btn ${saved?'saved':''}`} onClick={handleSave}>
+          <button className={`save-btn ${saved ? 'saved' : ''}`} onClick={handleSave}>
             {saved ? 'Gespeichert ✓' : 'Einstellungen speichern'}
           </button>
         </div>
