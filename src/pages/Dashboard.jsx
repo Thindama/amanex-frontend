@@ -11,8 +11,11 @@ const AI_MODELS = [
 ];
 
 function fmtEur(n) {
+  // Trotz des Namens zeigen wir USDC an, solange Hyperliquid die einzige
+  // echte Balance-Quelle ist. Kraken (EUR) ist derzeit ohne API Keys und
+  // liefert keine reale Balance — 10k-EUR-Fallback ist entfernt.
   if (n === null || n === undefined || isNaN(n)) return '—';
-  return new Intl.NumberFormat('de-DE', { maximumFractionDigits: 0 }).format(n) + ' EUR';
+  return new Intl.NumberFormat('de-DE', { maximumFractionDigits: 2 }).format(n) + ' USDC';
 }
 function fmtPct(n, digits = 1) {
   if (n === null || n === undefined || isNaN(n)) return '—';
