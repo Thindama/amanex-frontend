@@ -3,18 +3,6 @@ import { useEffect, useState } from 'react';
 const NAV = [
   { group: 'Übersicht', items: [
     { id: 'p1', label: '⬡  Live Dashboard' },
-    { id: 'p2', label: '◎  Bot-Steuerung' },
-    { id: 'p3', label: '◈  Markt-Scanner' },
-  ]},
-  { group: 'Analyse', items: [
-    { id: 'p4', label: '◉  Trade-Historie' },
-    { id: 'p5', label: '▲  Performance' },
-    { id: 'p6', label: '◆  Wissensbasis' },
-  ]},
-  { group: 'System', items: [
-    { id: 'p7', label: '□  Auszahlung' },
-    { id: 'p8', label: '★  Team' },
-    { id: 'p9', label: '⊕  API-Keys' },
   ]},
 ];
 
