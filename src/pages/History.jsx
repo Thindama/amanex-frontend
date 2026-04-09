@@ -19,7 +19,6 @@ function normalizeSide(side) {
 }
 function platBadge(plat) {
   const p = (plat || '').toLowerCase();
-  if (p === 'binance') return 'b-blue';
   if (p === 'kraken') return 'b-yellow';
   if (p === 'hyperliquid') return 'b-blue';
   return 'b-blue';
@@ -109,7 +108,6 @@ export function History() {
               ['open', 'Offen'],
               ['won', 'Gewonnen'],
               ['lost', 'Verloren'],
-              ['binance', 'Binance'],
               ['kraken', 'Kraken'],
               ['hyperliquid', 'Hyperliquid'],
             ].map(([k, l]) => (

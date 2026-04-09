@@ -9,7 +9,7 @@ const PAGE_META = {
   p1: 'Letzter Scan: vor 4 Min.',     p2: 'Einstellungen & Risikoparameter',
   p3: '312 Märkte überwacht',          p4: '90-Tage-Übersicht · 312 Trades',
   p5: '90-Tage-Analyse',              p6: '47 Lektionen gespeichert',
-  p7: 'Binance + Kraken',             p8: '3 aktive Mitglieder',
+  p7: 'Kraken + Hyperliquid',         p8: '3 aktive Mitglieder',
   p9: '9 Dienste konfigurieren',
 };
 const NOTIFS = [

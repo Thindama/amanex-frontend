@@ -26,7 +26,6 @@ function signalMeta(signal) {
 
 function platBadge(plat) {
   const p = (plat || '').toLowerCase();
-  if (p === 'binance') return 'b-blue';
   if (p === 'kraken') return 'b-yellow';
   if (p === 'hyperliquid') return 'b-blue';
   if (p === 'stocks' || p === 'aktien') return 'b-blue';
@@ -66,7 +65,6 @@ export default function Scanner() {
   const filtered = markets.filter(m => {
     if (filter === 'all') return true;
     const p = (m.platform || '').toLowerCase();
-    if (filter === 'binance') return p === 'binance';
     if (filter === 'kraken') return p === 'kraken';
     if (filter === 'hyperliquid') return p === 'hyperliquid';
     if (filter === 'stocks') return p === 'stocks' || p === 'aktien';
@@ -132,7 +130,6 @@ export default function Scanner() {
           <div className="filter-row">
             {[
               ['all', 'Alle'],
-              ['binance', 'Binance'],
               ['kraken', 'Kraken'],
               ['hyperliquid', 'Hyperliquid'],
               ['stocks', 'Aktien'],

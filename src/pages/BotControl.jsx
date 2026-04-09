@@ -134,7 +134,7 @@ export default function BotControl({ botOn, setBotOn }) {
         <div className="card">
           <div className="card-head"><div className="card-title">Aktive Plattformen</div></div>
           <div className="row-2" style={{ marginBottom: '16px' }}>
-            {[['Binance', 'USDT Paare'], ['Kraken', 'EUR Paare'], ['Hyperliquid', 'Perps + HIP-3']].map(([p, sub]) => (
+            {[['Kraken', 'EUR Paare'], ['Hyperliquid', 'Perps + HIP-3']].map(([p, sub]) => (
               <div key={p} style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--blue)', background: 'rgba(184,151,90,.07)', cursor: 'pointer' }}>
                 <div style={{ fontSize: '13px', fontWeight: 500 }}>{p}</div>
                 <div style={{ fontSize: '10px', color: 'var(--muted)', marginTop: '3px' }}>{sub}</div>

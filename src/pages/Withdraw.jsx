@@ -1,19 +1,19 @@
 const PLATFORMS = [
   {
-    name: 'Binance', color: '#f0b90b', sub: 'Crypto Wallet · USDT',
-    amount: '$8.240', eur: 'ca. 7.620 EUR · Verfügbar',
-    wallet: '0x1a2b...8f9e · USDT', btnLabel: 'Auf Binance auszahlen',
-    btnColor: '#00d68f', btnText: '#000',
-    link: 'https://www.binance.com/de/my/wallet/account/main/withdrawal',
-    steps: ['USDT von Wallet auf Krypto-Börse senden','Auf Coinbase oder Kraken in EUR tauschen','EUR auf Bankkonto überweisen'],
-  },
-  {
     name: 'Kraken', color: '#5741d9', sub: 'EUR Wallet · Direkt',
-    amount: '3.627 EUR', eur: 'Direkt verfügbar · EUR',
+    amount: '—', eur: 'SEPA · EUR direkt verfügbar',
     wallet: 'SEPA-Überweisung · 1-3 Tage', btnLabel: 'Auf Kraken auszahlen',
     btnColor: '#b8975a', btnText: '#000',
     link: 'https://www.kraken.com/u/funding/withdraw',
     steps: ['kraken.com → Funding → Withdraw','Betrag und IBAN eingeben','Bestätigen · 1-3 Werktage'],
+  },
+  {
+    name: 'Hyperliquid', color: '#1a1a2e', sub: 'Perps · USDC Wallet',
+    amount: '—', eur: 'USDC → EUR über Kraken',
+    wallet: 'Agent Wallet · Vault', btnLabel: 'Auf Hyperliquid auszahlen',
+    btnColor: '#00d68f', btnText: '#000',
+    link: 'https://app.hyperliquid.xyz/portfolio',
+    steps: ['hyperliquid.xyz → Portfolio → Withdraw','USDC auf Arbitrum-Wallet senden','Über Kraken in EUR tauschen und auszahlen'],
   },
 ];
 

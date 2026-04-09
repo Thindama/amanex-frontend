@@ -44,8 +44,7 @@ const AI_APIS = [
   { icon:'DS', iconBg:'#2d5a9e', name:'DeepSeek', desc:'15% Gewichtung', connected:true, fields:[{placeholder:'API Key...', default:'sk-xxxx'}] },
 ];
 const MARKET_APIS = [
-  { icon:'BN', iconBg:'#f0b90b', name:'Binance', desc:'Crypto · USDT Paare', connected:true, fields:[{placeholder:'API Key...', default:'xxxx'},{placeholder:'API Secret...', default:'xxxx'}] },
-  { icon:'KR', iconBg:'#5741d9', name:'Kraken', desc:'Crypto · EUR Paare', connected:false, fields:[{placeholder:'API Key...'},{placeholder:'API Secret...'}] },
+  { icon:'KR', iconBg:'#5741d9', name:'Kraken', desc:'Crypto · EUR Paare (BaFin reguliert)', connected:true, fields:[{placeholder:'API Key...'},{placeholder:'API Secret...'}] },
   { icon:'HL', iconBg:'#1a1a2e', name:'Hyperliquid', desc:'Perps · HIP-3 (Stocks/Commodities)', connected:false, fields:[{placeholder:'Agent Private Key (0x...)'},{placeholder:'Vault Address (0x...)'}] },
   { icon:'X', iconBg:'#1da1f2', name:'Twitter / X API', desc:'Echtzeit-Sentiment', connected:true, fields:[{placeholder:'Bearer Token...', default:'AAAA'}] },
   { icon:'RD', iconBg:'#ff4500', name:'Reddit API', desc:'Community-Sentiment', connected:false, fields:[{placeholder:'Client ID...'},{placeholder:'Client Secret...'}] },
